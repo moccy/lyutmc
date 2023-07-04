@@ -2,6 +2,7 @@ mod device;
 mod event;
 mod pipeline;
 mod shader;
+mod shapes;
 mod surface;
 mod window;
 
