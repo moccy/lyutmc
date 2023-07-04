@@ -1,3 +1,10 @@
+mod device;
+mod event;
+mod pipeline;
+mod shader;
+mod surface;
+mod window;
+
 use std::fs;
 
 use log::info;
@@ -19,7 +26,9 @@ fn main() {
     const WINDOW_SIZE: [u32; 2] = [1920, 1080];
 
     let event_loop = EventLoop::new();
-    let (logical_window_size, physical_window_size) = get_window_sizes(&event_loop, WINDOW_SIZE);
+    let (logical_window_size, physical_window_size) =
+        window::get_window_sizes(&event_loop, WINDOW_SIZE);
+
     let window = WindowBuilder::new()
         .with_title("LyutMC")
         .with_theme(Some(Theme::Dark))
@@ -120,7 +129,7 @@ fn handle_window_event(
             if input.state == winit::event::ElementState::Released {
                 match input.virtual_keycode {
                     Some(winit::event::VirtualKeyCode::F11) => {
-                        toggle_fullscreen(&window);
+                        window::toggle_fullscreen(&window);
                     }
                     _ => (),
                 }
@@ -222,27 +231,4 @@ fn create_shader(shader_path: &str, device: &wgpu::Device) -> wgpu::ShaderModule
         label: None,
         source: wgpu::ShaderSource::Wgsl(shader_source.into()),
     })
-}
-
-fn toggle_fullscreen(window: &Window) {
-    if window.fullscreen().is_none() {
-        window.set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)))
-    } else {
-        window.set_fullscreen(None);
-    }
-}
-
-fn get_window_sizes(
-    event_loop: &EventLoop<()>,
-    window_size: [u32; 2],
-) -> (LogicalSize<u32>, PhysicalSize<u32>) {
-    let monitor = event_loop
-        .primary_monitor()
-        .or_else(|| event_loop.available_monitors().next())
-        .expect("Failed to find a monitor.");
-    let dpi = monitor.scale_factor();
-    let logical: LogicalSize<u32> = window_size.into();
-    let physical: PhysicalSize<u32> = logical.to_physical(dpi);
-
-    (logical, physical)
 }
