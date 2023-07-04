@@ -5,17 +5,11 @@ mod shader;
 mod surface;
 mod window;
 
-use std::fs;
-
 use log::info;
-use wgpu::{
-    self, Device, DeviceDescriptor, Features, PipelineLayoutDescriptor, RenderPipelineDescriptor,
-    Surface, SurfaceConfiguration, TextureFormat,
-};
+use wgpu;
 use winit::{
-    dpi::{LogicalSize, PhysicalSize},
-    event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
+    event::Event,
+    event_loop::EventLoop,
     window::{Theme, Window, WindowBuilder},
 };
 
@@ -26,8 +20,7 @@ fn main() {
     const WINDOW_SIZE: [u32; 2] = [1920, 1080];
 
     let event_loop = EventLoop::new();
-    let (logical_window_size, physical_window_size) =
-        window::get_window_sizes(&event_loop, WINDOW_SIZE);
+    let (logical_window_size, _) = window::get_window_sizes(&event_loop, WINDOW_SIZE);
 
     let window = WindowBuilder::new()
         .with_title("LyutMC")
@@ -46,13 +39,13 @@ async fn run(window: Window, event_loop: EventLoop<()>) {
     let (device, queue) = device::create_device_and_queue(&adapter).await;
     let shader = shader::create_shader("src/shaders/triangle.wgsl", &device);
 
-    let pipeline_layout = create_pipeline_layout(&device);
+    let pipeline_layout = pipeline::create_pipeline_layout(&device);
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
     let swapchain_format = swapchain_capabilities.formats[0];
 
     let render_pipeline =
-        create_render_pipeline(&device, pipeline_layout, shader, swapchain_format);
+        pipeline::create_render_pipeline(&device, pipeline_layout, shader, swapchain_format);
     let mut config =
         surface::create_surface_config(swapchain_format, &window, swapchain_capabilities);
 
@@ -63,7 +56,14 @@ async fn run(window: Window, event_loop: EventLoop<()>) {
 
         match event {
             Event::WindowEvent { window_id, event } if window_id == window.id() => {
-                handle_window_event(event, &window, &device, control_flow, &surface, &mut config)
+                event::handle_window_event(
+                    event,
+                    &window,
+                    &device,
+                    control_flow,
+                    &surface,
+                    &mut config,
+                )
             }
             Event::MainEventsCleared => {
                 // At this point, all input events have been processed.
@@ -104,74 +104,6 @@ async fn run(window: Window, event_loop: EventLoop<()>) {
             _ => (),
         }
     });
-}
-
-fn handle_window_event(
-    event: WindowEvent<'_>,
-    window: &Window,
-    device: &Device,
-    control_flow: &mut ControlFlow,
-    surface: &Surface,
-    config: &mut SurfaceConfiguration,
-) {
-    match event {
-        WindowEvent::CloseRequested => control_flow.set_exit(),
-        WindowEvent::Resized(dimensions) => {
-            config.width = dimensions.width;
-            config.height = dimensions.height;
-            surface.configure(&device, &config);
-        }
-        WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-            config.width = new_inner_size.width;
-            config.height = new_inner_size.height;
-            surface.configure(&device, &config);
-        }
-        WindowEvent::KeyboardInput { input, .. } => {
-            if input.state == winit::event::ElementState::Released {
-                match input.virtual_keycode {
-                    Some(winit::event::VirtualKeyCode::F11) => {
-                        window::toggle_fullscreen(&window);
-                    }
-                    _ => (),
-                }
-            }
-        }
-        _ => (),
-    }
-}
-
-fn create_render_pipeline(
-    device: &wgpu::Device,
-    pipeline_layout: wgpu::PipelineLayout,
-    shader: wgpu::ShaderModule,
-    swapchain_format: wgpu::TextureFormat,
-) -> wgpu::RenderPipeline {
-    device.create_render_pipeline(&RenderPipelineDescriptor {
-        label: None,
-        layout: Some(&pipeline_layout),
-        vertex: wgpu::VertexState {
-            module: &shader,
-            entry_point: "vs_main",
-            buffers: &[],
-        },
-        fragment: Some(wgpu::FragmentState {
-            module: &shader,
-            entry_point: "fs_main",
-            targets: &[Some(swapchain_format.into())],
-        }),
-        primitive: wgpu::PrimitiveState::default(),
-        depth_stencil: None,
-        multisample: wgpu::MultisampleState::default(),
-        multiview: None,
-    })
-}
-
-fn create_pipeline_layout(device: &wgpu::Device) -> wgpu::PipelineLayout {
-    device.create_pipeline_layout(&PipelineLayoutDescriptor {
-        label: None,
-        bind_group_layouts: &[],
-        push_constant_ranges: &[],
-    })
 }
 
 async fn create_adapter(instance: wgpu::Instance, surface: &wgpu::Surface) -> wgpu::Adapter {
