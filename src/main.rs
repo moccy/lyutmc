@@ -43,7 +43,7 @@ async fn run(window: Window, event_loop: EventLoop<()>) {
     let instance = wgpu::Instance::default();
     let surface = surface::create_surface(&instance, &window);
     let adapter = create_adapter(instance, &surface).await;
-    let (device, queue) = create_device_and_queue(&adapter).await;
+    let (device, queue) = device::create_device_and_queue(&adapter).await;
     let shader = create_shader("src/shaders/triangle.wgsl", &device);
 
     let pipeline_layout = create_pipeline_layout(&device);
@@ -183,21 +183,6 @@ async fn create_adapter(instance: wgpu::Instance, surface: &wgpu::Surface) -> wg
         })
         .await
         .expect("Failed to find an adapter.")
-}
-
-async fn create_device_and_queue(adapter: &wgpu::Adapter) -> (wgpu::Device, wgpu::Queue) {
-    adapter
-        .request_device(
-            &DeviceDescriptor {
-                label: None,
-                features: Features::empty(),
-                limits: wgpu::Limits::downlevel_webgl2_defaults()
-                    .using_resolution(adapter.limits()),
-            },
-            None,
-        )
-        .await
-        .expect("Failed to create virtual device and queue.")
 }
 
 fn create_shader(shader_path: &str, device: &wgpu::Device) -> wgpu::ShaderModule {
