@@ -18,10 +18,7 @@ fn main() {
     let window = WindowBuilder::new()
         .with_title("LyutMC")
         .with_theme(Some(Theme::Dark))
-        .with_inner_size(LogicalSize {
-            width: 1920,
-            height: 1080,
-        })
+        .with_inner_size(logical_window_size)
         .build(&event_loop)
         .expect("Failed to create window.");
 
