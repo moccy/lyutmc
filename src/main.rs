@@ -44,7 +44,7 @@ async fn run(window: Window, event_loop: EventLoop<()>) {
     let surface = surface::create_surface(&instance, &window);
     let adapter = create_adapter(instance, &surface).await;
     let (device, queue) = device::create_device_and_queue(&adapter).await;
-    let shader = create_shader("src/shaders/triangle.wgsl", &device);
+    let shader = shader::create_shader("src/shaders/triangle.wgsl", &device);
 
     let pipeline_layout = create_pipeline_layout(&device);
 
@@ -183,14 +183,4 @@ async fn create_adapter(instance: wgpu::Instance, surface: &wgpu::Surface) -> wg
         })
         .await
         .expect("Failed to find an adapter.")
-}
-
-fn create_shader(shader_path: &str, device: &wgpu::Device) -> wgpu::ShaderModule {
-    let shader_source = fs::read_to_string(shader_path)
-        .expect(format!("Failed to load shader at path: {}", shader_path).as_str());
-
-    device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        label: None,
-        source: wgpu::ShaderSource::Wgsl(shader_source.into()),
-    })
 }
