@@ -1,5 +1,5 @@
 use input::InputManager;
-use shapes::triangle::Triangle;
+use shapes::{cube::Cube, triangle::Triangle};
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
 
 mod device;
@@ -35,7 +35,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
     // A handle to a compiled shader module.
-    let shader = shader::create_shader("src/shaders/triangle.wgsl", &device);
+    let shader = shader::create_shader("src/shaders/shader.wgsl", &device);
     let pipeline_layout = pipeline::create_pipeline_layout(&device);
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
@@ -48,7 +48,8 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
 
     surface.configure(&device, &config);
 
-    let triangle = Triangle::new(&device);
+    // let triangle = Triangle::new(&device);
+    let cube = Cube::new(&device);
 
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
@@ -102,11 +103,11 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 });
                 render_pass.set_pipeline(&active_render_pipeline);
 
-                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
+                render_pass.set_vertex_buffer(0, cube.vertex_buffer.slice(..));
                 render_pass
-                    .set_index_buffer(triangle.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                    .set_index_buffer(cube.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
                 // Draw something with 3 vertices and 1 instance.
-                render_pass.draw_indexed(0..Triangle::get_indices_len(), 0, 0..1);
+                render_pass.draw_indexed(0..Cube::get_indices_len(), 0, 0..1);
 
                 // We drop render_pass so we can call encoder.finish(),
                 // since render_pass borrows encoder mutably.

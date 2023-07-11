@@ -16,7 +16,7 @@ fn vs_main(model: VertexInput) -> VertexOutput {
     // Passthrough color
     out.vertex_color = model.vertex_color;
     // Clip position is the position in screenspace, e.g. the pixel the vertex is on.
-    out.clip_position = vec4<f32>(model.vertex_position, 1.0);
+    out.clip_position = vec4<f32>(model.vertex_position / 2.0, 1.0);
 
     return out;
 }
