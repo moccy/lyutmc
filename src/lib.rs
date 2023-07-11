@@ -62,7 +62,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
-                // Rendering goes here.
+                // Get the next frame in the swap chain to draw to
                 let frame = surface
                     .get_current_texture()
                     .expect("Failed to get next swapchain texture");
@@ -72,22 +72,32 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 let mut encoder =
                     device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-                {
-                    let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                        label: None,
-                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                            view: &view,
-                            resolve_target: None,
-                            ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                                store: true,
-                            },
-                        })],
-                        depth_stencil_attachment: None,
-                    });
-                    render_pass.set_pipeline(&render_pipeline);
-                    render_pass.draw(0..3, 0..1)
-                }
+                // Create a render pass, which is a type of command buffer
+                let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: Some("Render Pass"), // for debugging
+                    // This is what @location(0) in the fragment shader targets
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        // The texture view we created is basically saying render to a texture on our surface
+                        view: &view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            // Load is how to handle the colours stored from the previous frame.
+                            // In this case, we are clearing it to a black colour.
+                            load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                            // Store is whether we want to store the texture on the underlying texture or not
+                            store: true,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                });
+                render_pass.set_pipeline(&render_pipeline);
+
+                // Draw something with 3 vertices and 1 instance.
+                render_pass.draw(0..3, 0..1);
+
+                // We drop render_pass so we can call encoder.finish(),
+                // since render_pass borrows encoder mutably.
+                drop(render_pass);
 
                 queue.submit(Some(encoder.finish()));
                 frame.present();

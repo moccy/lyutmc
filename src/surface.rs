@@ -9,13 +9,13 @@ pub fn create_surface(instance: &wgpu::Instance, window: &Window) -> wgpu::Surfa
 }
 
 pub fn create_surface_config(
-    swapchain_format: wgpu::TextureFormat,
+    surface_format: wgpu::TextureFormat,
     window: &Window,
     swapchain_capabilities: wgpu::SurfaceCapabilities,
 ) -> wgpu::SurfaceConfiguration {
     wgpu::SurfaceConfiguration {
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-        format: swapchain_format,
+        format: surface_format,
         width: window.inner_size().width,
         height: window.inner_size().height,
         present_mode: wgpu::PresentMode::Fifo,

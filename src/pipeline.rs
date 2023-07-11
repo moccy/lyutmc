@@ -20,16 +20,35 @@ pub fn create_render_pipeline(
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: "vs_main",
-            buffers: &[],
+            buffers: &[], // What type of vertices to pass to the vertex shader.
         },
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: "fs_main",
             targets: &[Some(swapchain_format.into())],
         }),
-        primitive: wgpu::PrimitiveState::default(),
+        // Describes how to interpret vertices when converting them to triangles
+        primitive: wgpu::PrimitiveState {
+            // Every 3 vertices will be 1 triangle.
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: None,
+            // If the vertices are arranged in CCW direction, the triangle is facing forward
+            front_face: wgpu::FrontFace::Ccw,
+            // Cull any triangles facing backwards (remove them from the render)
+            cull_mode: Some(wgpu::Face::Back),
+            // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
+            polygon_mode: wgpu::PolygonMode::Fill,
+            // Requires Features::DEPTH_CLIP_CONTROL
+            unclipped_depth: false,
+            // Requires Features::CONSERVATIVE_RASTERIZATION
+            conservative: false,
+        },
         depth_stencil: None,
-        multisample: wgpu::MultisampleState::default(),
+        multisample: wgpu::MultisampleState {
+            count: 1,
+            mask: !0, // Used to determine which samples should be active, this means all of them
+            alpha_to_coverage_enabled: false, // Related to anti-aliasing
+        },
         multiview: None,
     })
 }
