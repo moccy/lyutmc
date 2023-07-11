@@ -48,7 +48,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
 
     surface.configure(&device, &config);
 
-    let triangle_vbo = Triangle::get_vertex_buffer(&device);
+    let triangle = Triangle::new(&device);
 
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
@@ -102,13 +102,13 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 });
                 render_pass.set_pipeline(&active_render_pipeline);
 
-                render_pass.set_vertex_buffer(0, triangle_vbo.slice(..));
+                render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
                 // Draw something with 3 vertices and 1 instance.
-                render_pass.draw(0..Triangle::get_vertices().len() as u32, 0..1);
+                render_pass.draw(0..Triangle::get_vertices_len(), 0..1);
 
                 // We drop render_pass so we can call encoder.finish(),
                 // since render_pass borrows encoder mutably.
-                drop(render_pass);
+                std::mem::drop(render_pass);
 
                 queue.submit(Some(encoder.finish()));
                 frame.present();

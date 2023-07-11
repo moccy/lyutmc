@@ -2,15 +2,19 @@ use crate::primitives::vertex::Vertex;
 use ultraviolet as uv;
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub struct Triangle {}
+pub struct Triangle {
+    pub vertex_buffer: Buffer,
+}
 
 impl Triangle {
-    pub fn get_vertex_buffer(device: &Device) -> Buffer {
-        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+    pub fn new(device: &Device) -> Self {
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Triangle Vertex Buffer"),
             contents: bytemuck::cast_slice(&Triangle::get_vertices()),
             usage: wgpu::BufferUsages::VERTEX,
-        })
+        });
+
+        Self { vertex_buffer }
     }
 
     pub fn get_vertices() -> [Vertex; 3] {
@@ -28,5 +32,9 @@ impl Triangle {
                 color: uv::Vec3::new(0.0, 0.0, 1.0),     // B
             },
         ]
+    }
+
+    pub fn get_vertices_len() -> u32 {
+        Triangle::get_vertices().len() as u32
     }
 }
