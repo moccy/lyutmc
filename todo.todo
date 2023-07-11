@@ -1,0 +1,12 @@
+Beginner:
+    ✔ Triangle Rendered @done(23-07-11 23:06)
+    ✔ Cube Rendered @done(23-07-11 23:06)
+    ☐ Camera
+    ☐ Textures
+    ☐ Instancing
+    ☐ Depth Buffer
+    ☐ Model Loading
+Intermediate:
+    ☐ Lighting
+    ☐ Normal Mapping
+    ☐ Improved Camera
