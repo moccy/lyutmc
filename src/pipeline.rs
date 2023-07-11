@@ -32,8 +32,8 @@ pub fn create_render_pipeline(
             // Every 3 vertices will be 1 triangle.
             topology: wgpu::PrimitiveTopology::TriangleList,
             strip_index_format: None,
-            // If the vertices are arranged in CCW direction, the triangle is facing forward
-            front_face: wgpu::FrontFace::Ccw,
+            // If the vertices are arranged in CW direction, the triangle is facing forward
+            front_face: wgpu::FrontFace::Cw,
             // Cull any triangles facing backwards (remove them from the render)
             cull_mode: Some(wgpu::Face::Back),
             // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
