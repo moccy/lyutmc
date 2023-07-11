@@ -1,10 +1,12 @@
 use input::InputManager;
+use shapes::triangle::Triangle;
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
 
 mod device;
 mod event;
 mod input;
 mod pipeline;
+mod primitives;
 mod shader;
 mod shapes;
 mod surface;
@@ -33,20 +35,20 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
     // A handle to a compiled shader module.
-    let shader = shader::create_shader("src/shaders/cube.wgsl", &device);
+    let shader = shader::create_shader("src/shaders/triangle.wgsl", &device);
     let pipeline_layout = pipeline::create_pipeline_layout(&device);
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
     let swapchain_format = swapchain_capabilities.formats[0];
 
-    let mut active_render_pipeline =
+    let active_render_pipeline =
         pipeline::create_render_pipeline(&device, &pipeline_layout, &shader, swapchain_format);
     let mut config =
         surface::create_surface_config(swapchain_format, &window, swapchain_capabilities);
 
     surface.configure(&device, &config);
 
-    let mut pipeline_toggled = false;
+    let triangle_vbo = Triangle::get_vertex_buffer(&device);
 
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
@@ -65,29 +67,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
             }
             Event::MainEventsCleared => {
                 // At this point, all input events have been processed.
-                if input_manager.key_pressed(winit::event::VirtualKeyCode::Space) {
-                    if !pipeline_toggled {
-                        active_render_pipeline = pipeline::create_alt_render_pipeline(
-                            &device,
-                            &pipeline_layout,
-                            &shader,
-                            swapchain_format,
-                        );
-
-                        pipeline_toggled = true;
-                    } else {
-                        active_render_pipeline = pipeline::create_render_pipeline(
-                            &device,
-                            &pipeline_layout,
-                            &shader,
-                            swapchain_format,
-                        );
-
-                        pipeline_toggled = false;
-                    }
-
-                    input_manager.set_key_state(winit::event::VirtualKeyCode::Space, false);
-                }
+                input_manager.set_key_state(winit::event::VirtualKeyCode::Space, false);
                 // Time to render the scene.
                 window.request_redraw();
             }
@@ -122,8 +102,9 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 });
                 render_pass.set_pipeline(&active_render_pipeline);
 
+                render_pass.set_vertex_buffer(0, triangle_vbo.slice(..));
                 // Draw something with 3 vertices and 1 instance.
-                render_pass.draw(0..3, 0..1);
+                render_pass.draw(0..Triangle::get_vertices().len() as u32, 0..1);
 
                 // We drop render_pass so we can call encoder.finish(),
                 // since render_pass borrows encoder mutably.
