@@ -1,7 +1,9 @@
+use input::InputManager;
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
 
 mod device;
 mod event;
+mod input;
 mod pipeline;
 mod shader;
 mod shapes;
@@ -19,6 +21,8 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
         .build(&event_loop)
         .expect("Failed to create window.");
 
+    let mut input_manager = InputManager::new();
+
     // Creates a surface, which is a handle to something we can render images to.
     let surface = surface::create_surface(&instance, &window);
 
@@ -29,18 +33,20 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
     // A handle to a compiled shader module.
-    let shader = shader::create_shader("src/shaders/triangle.wgsl", &device);
+    let shader = shader::create_shader("src/shaders/cube.wgsl", &device);
     let pipeline_layout = pipeline::create_pipeline_layout(&device);
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
     let swapchain_format = swapchain_capabilities.formats[0];
 
-    let render_pipeline =
-        pipeline::create_render_pipeline(&device, pipeline_layout, shader, swapchain_format);
+    let mut active_render_pipeline =
+        pipeline::create_render_pipeline(&device, &pipeline_layout, &shader, swapchain_format);
     let mut config =
         surface::create_surface_config(swapchain_format, &window, swapchain_capabilities);
 
     surface.configure(&device, &config);
+
+    let mut pipeline_toggled = false;
 
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
@@ -54,10 +60,34 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                     control_flow,
                     &surface,
                     &mut config,
+                    &mut input_manager,
                 )
             }
             Event::MainEventsCleared => {
                 // At this point, all input events have been processed.
+                if input_manager.key_pressed(winit::event::VirtualKeyCode::Space) {
+                    if !pipeline_toggled {
+                        active_render_pipeline = pipeline::create_alt_render_pipeline(
+                            &device,
+                            &pipeline_layout,
+                            &shader,
+                            swapchain_format,
+                        );
+
+                        pipeline_toggled = true;
+                    } else {
+                        active_render_pipeline = pipeline::create_render_pipeline(
+                            &device,
+                            &pipeline_layout,
+                            &shader,
+                            swapchain_format,
+                        );
+
+                        pipeline_toggled = false;
+                    }
+
+                    input_manager.set_key_state(winit::event::VirtualKeyCode::Space, false);
+                }
                 // Time to render the scene.
                 window.request_redraw();
             }
@@ -90,7 +120,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                     })],
                     depth_stencil_attachment: None,
                 });
-                render_pass.set_pipeline(&render_pipeline);
+                render_pass.set_pipeline(&active_render_pipeline);
 
                 // Draw something with 3 vertices and 1 instance.
                 render_pass.draw(0..3, 0..1);
