@@ -103,8 +103,10 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 render_pass.set_pipeline(&active_render_pipeline);
 
                 render_pass.set_vertex_buffer(0, triangle.vertex_buffer.slice(..));
+                render_pass
+                    .set_index_buffer(triangle.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
                 // Draw something with 3 vertices and 1 instance.
-                render_pass.draw(0..Triangle::get_vertices_len(), 0..1);
+                render_pass.draw_indexed(0..Triangle::get_indices_len(), 0, 0..1);
 
                 // We drop render_pass so we can call encoder.finish(),
                 // since render_pass borrows encoder mutably.

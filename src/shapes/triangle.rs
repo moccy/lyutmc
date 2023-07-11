@@ -4,6 +4,7 @@ use wgpu::{util::DeviceExt, Buffer, Device};
 
 pub struct Triangle {
     pub vertex_buffer: Buffer,
+    pub index_buffer: Buffer,
 }
 
 impl Triangle {
@@ -14,7 +15,16 @@ impl Triangle {
             usage: wgpu::BufferUsages::VERTEX,
         });
 
-        Self { vertex_buffer }
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Triangle Index Buffer"),
+            contents: bytemuck::cast_slice(&Triangle::get_indices()),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
+        Self {
+            vertex_buffer,
+            index_buffer,
+        }
     }
 
     pub fn get_vertices() -> [Vertex; 3] {
@@ -34,7 +44,15 @@ impl Triangle {
         ]
     }
 
+    pub fn get_indices() -> [u16; 3] {
+        [0, 1, 2]
+    }
+
     pub fn get_vertices_len() -> u32 {
-        Triangle::get_vertices().len() as u32
+        3
+    }
+
+    pub fn get_indices_len() -> u32 {
+        3
     }
 }
