@@ -31,36 +31,36 @@ impl Cube {
     pub fn get_vertices() -> [Vertex; 8] {
         [
             Vertex {
-                position: uv::Vec3::new(-1.0, -1.0, 1.0),
-                color: uv::Vec3::new(1.0, 0.0, 0.0), // Red
+                position: uv::Vec3::new(-1.0, -1.0, 1.0), // Front Bottom Left
+                color: uv::Vec3::new(1.0, 0.0, 0.0),      // Red
             },
             Vertex {
-                position: uv::Vec3::new(1.0, -1.0, 1.0),
-                color: uv::Vec3::new(0.0, 1.0, 0.0), // Green
+                position: uv::Vec3::new(1.0, -1.0, 1.0), // Front Bottom Right
+                color: uv::Vec3::new(0.0, 1.0, 0.0),     // Green
             },
             Vertex {
-                position: uv::Vec3::new(1.0, 1.0, 1.0),
-                color: uv::Vec3::new(0.0, 0.0, 1.0), // Blue
+                position: uv::Vec3::new(1.0, 1.0, 1.0), // Front Top Right
+                color: uv::Vec3::new(1.0, 0.0, 1.0),    // Magenta
             },
             Vertex {
-                position: uv::Vec3::new(-1.0, 1.0, 1.0),
-                color: uv::Vec3::new(1.0, 1.0, 0.0), // Yellow
+                position: uv::Vec3::new(-1.0, 1.0, 1.0), // Front Top Left
+                color: uv::Vec3::new(1.0, 1.0, 0.0),     // Yellow
             },
             Vertex {
-                position: uv::Vec3::new(-1.0, -1.0, -1.0),
-                color: uv::Vec3::new(1.0, 0.0, 1.0), // Magenta
+                position: uv::Vec3::new(-1.0, -1.0, -1.0), // Back Bottom Right
+                color: uv::Vec3::new(0.0, 0.0, 1.0),       // Blue
             },
             Vertex {
-                position: uv::Vec3::new(1.0, -1.0, -1.0),
-                color: uv::Vec3::new(0.0, 1.0, 1.0), // Cyan
+                position: uv::Vec3::new(1.0, -1.0, -1.0), // Back Bottom Left
+                color: uv::Vec3::new(0.0, 1.0, 1.0),      // Cyan
             },
             Vertex {
-                position: uv::Vec3::new(1.0, 1.0, -1.0),
-                color: uv::Vec3::new(1.0, 1.0, 1.0), // White
+                position: uv::Vec3::new(1.0, 1.0, -1.0), // Back Top Left
+                color: uv::Vec3::new(1.0, 1.0, 1.0),     // White
             },
             Vertex {
-                position: uv::Vec3::new(-1.0, 1.0, -1.0),
-                color: uv::Vec3::new(0.5, 0.5, 0.5), // Grey
+                position: uv::Vec3::new(-1.0, 1.0, -1.0), // Back Top Right
+                color: uv::Vec3::new(0.5, 0.5, 0.5),      // Grey
             },
         ]
     }
