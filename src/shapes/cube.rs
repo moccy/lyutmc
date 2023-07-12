@@ -67,12 +67,13 @@ impl Cube {
 
     pub fn get_indices() -> [u16; 36] {
         [
-            0, 2, 1, 0, 3, 2, // front
-            1, 2, 6, 1, 6, 5, // right
-            4, 6, 7, 4, 5, 6, // back
-            0, 7, 3, 0, 4, 7, // left
-            0, 5, 4, 0, 1, 5, // bottom
-            2, 7, 6, 2, 3, 7, // top
+            // front face (Z-positive)
+            2, 1, 0, 0, 3, 2, // right face (X-positive)
+            6, 5, 1, 1, 2, 6, // back face (Z-negative)
+            7, 4, 5, 5, 6, 7, // left face (X-negative)
+            3, 0, 4, 4, 7, 3, // top face (Y-positive)
+            6, 2, 3, 3, 7, 6, // bottom face (Y-negative)
+            1, 5, 4, 4, 0, 1,
         ]
     }
 
