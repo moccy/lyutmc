@@ -1,4 +1,4 @@
-use camera::{Camera, CameraUniform};
+use camera::{camera::Camera, camera_controller::CameraController, camera_uniform::CameraUniform};
 use input::InputManager;
 use shapes::{cube::Cube, triangle::Triangle};
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
@@ -36,12 +36,13 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     // and a queue.
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
-    let camera = Camera::new(
-        (0.0, 1.0, 2.0).into(),
+    let mut camera = Camera::new(
+        (0.0, 1.3, 2.0).into(),
         (0.0, 0.0, 0.0).into(),
         logical_window_size.width as f32 / logical_window_size.height as f32,
     );
-    let camera_uniform = CameraUniform::new(&camera, &device);
+    let mut camera_uniform = CameraUniform::new(&camera, &device);
+    let camera_controller = CameraController::new(0.2);
 
     // A handle to a compiled shader module.
     let shader = shader::create_shader("src/shaders/shader.wgsl", &device);
@@ -77,6 +78,14 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
             }
             Event::MainEventsCleared => {
                 // At this point, all input events have been processed.
+                camera_controller.update_camera(&mut camera, &input_manager);
+                camera_uniform.update_view_projection(&mut camera);
+                queue.write_buffer(
+                    &camera_uniform.buffer,
+                    0,
+                    bytemuck::cast_slice(&[camera_uniform.view_projection]),
+                );
+
                 input_manager.set_key_state(winit::event::VirtualKeyCode::Space, false);
                 // Time to render the scene.
                 window.request_redraw();

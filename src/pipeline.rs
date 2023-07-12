@@ -1,6 +1,6 @@
 use wgpu::{PipelineLayoutDescriptor, RenderPipelineDescriptor};
 
-use crate::{camera::CameraUniform, primitives::vertex::Vertex};
+use crate::{camera::camera_uniform::CameraUniform, primitives::vertex::Vertex};
 
 pub fn create_pipeline_layout(
     device: &wgpu::Device,
