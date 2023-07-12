@@ -1,18 +1,18 @@
 struct CameraUniform {
     view_proj: mat4x4<f32>,
 };
-@group(0) @binding(0)
+@group(1) @binding(0)
 var<uniform> camera: CameraUniform;
 
 struct VertexInput {
     @location(0) vertex_position: vec3<f32>,
-    @location(1) vertex_color: vec3<f32>,
+    @location(1) tex_coords: vec2<f32>,
 }
 
 struct VertexOutput {
     // `@builtin(position)` tells wgpu that this value is used for clip coordinates
     @builtin(position) clip_position: vec4<f32>,
-    @location(0) vertex_color: vec3<f32>,
+    @location(0) tex_coords: vec2<f32>,
 }
 
 @vertex
@@ -20,14 +20,19 @@ fn vs_main(model: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     
     // Passthrough color
-    out.vertex_color = model.vertex_color;
+    out.tex_coords = model.tex_coords;
     // Clip position is the position in screenspace, e.g. the pixel the vertex is on.
-    out.clip_position = camera.view_proj * vec4<f32>(model.vertex_position / 2.0, 1.0);
+    out.clip_position = camera.view_proj * vec4<f32>(model.vertex_position, 1.0);
 
     return out;
 }
 
+@group(0) @binding(0)
+var t_diffuse: texture_2d<f32>;
+@group(0)@binding(1)
+var s_diffuse: sampler;
+
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    return vec4<f32>(input.vertex_color, 1.0);
+    return textureSample(t_diffuse, s_diffuse, input.tex_coords);
 }

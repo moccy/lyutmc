@@ -1,6 +1,9 @@
 use camera::{camera::Camera, camera_controller::CameraController, camera_uniform::CameraUniform};
+use image::GenericImageView;
 use input::InputManager;
-use shapes::{cube::Cube, triangle::Triangle};
+use shapes::cube::Cube;
+use texture::Texture;
+use wgpu::BindGroupEntry;
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
 
 mod camera;
@@ -12,6 +15,7 @@ mod primitives;
 mod shader;
 mod shapes;
 mod surface;
+mod texture;
 mod window;
 
 pub async fn run(window_title: &str, window_size: [u32; 2]) {
@@ -37,16 +41,51 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
     let mut camera = Camera::new(
-        (0.0, 1.3, 2.0).into(),
+        (0.0, 2.0, 3.0).into(),
         (0.0, 0.0, 0.0).into(),
         logical_window_size.width as f32 / logical_window_size.height as f32,
     );
     let mut camera_uniform = CameraUniform::new(&camera, &device);
     let camera_controller = CameraController::new(0.2);
 
+    let texture = Texture::new(&device, "src/assets/container.jpg");
+    queue.write_texture(
+        texture.get_image_copy(),
+        &texture.image.to_rgba8(),
+        texture.get_image_data_layout(),
+        texture.size,
+    );
+    let texture_view = texture
+        .inner_texture
+        .create_view(&wgpu::TextureViewDescriptor::default());
+    let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+        address_mode_u: wgpu::AddressMode::MirrorRepeat,
+        address_mode_v: wgpu::AddressMode::MirrorRepeat,
+        address_mode_w: wgpu::AddressMode::MirrorRepeat,
+        mag_filter: wgpu::FilterMode::Linear,
+        min_filter: wgpu::FilterMode::Nearest,
+        mipmap_filter: wgpu::FilterMode::Nearest,
+        ..Default::default()
+    });
+    let texture_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some("Texture Bind Group"),
+        layout: &texture.get_bind_group_layout(&device),
+        entries: &[
+            BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&texture_view),
+            },
+            BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::Sampler(&sampler),
+            },
+        ],
+    });
+
     // A handle to a compiled shader module.
     let shader = shader::create_shader("src/shaders/shader.wgsl", &device);
-    let pipeline_layout = pipeline::create_pipeline_layout(&device, &camera_uniform);
+    let pipeline_layout =
+        pipeline::create_pipeline_layout(&device, &camera_uniform, Some(&texture));
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
     let swapchain_format = swapchain_capabilities.formats[0];
@@ -120,8 +159,8 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                     depth_stencil_attachment: None,
                 });
                 render_pass.set_pipeline(&active_render_pipeline);
-
-                render_pass.set_bind_group(0, &camera_uniform.bind_group, &[]);
+                render_pass.set_bind_group(0, &texture_bind_group, &[]);
+                render_pass.set_bind_group(1, &camera_uniform.bind_group, &[]);
                 render_pass.set_vertex_buffer(0, cube.vertex_buffer.slice(..));
                 render_pass
                     .set_index_buffer(cube.index_buffer.slice(..), wgpu::IndexFormat::Uint16);

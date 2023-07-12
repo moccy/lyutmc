@@ -6,7 +6,7 @@ use wgpu::VertexBufferLayout;
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
 pub struct Vertex {
     pub position: uv::Vec3,
-    pub color: uv::Vec3,
+    pub tex_coords: uv::Vec2,
 }
 
 impl Vertex {

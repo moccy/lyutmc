@@ -1,14 +1,18 @@
 use wgpu::{PipelineLayoutDescriptor, RenderPipelineDescriptor};
 
-use crate::{camera::camera_uniform::CameraUniform, primitives::vertex::Vertex};
+use crate::{camera::camera_uniform::CameraUniform, primitives::vertex::Vertex, texture::Texture};
 
 pub fn create_pipeline_layout(
     device: &wgpu::Device,
     camera: &CameraUniform,
+    texture: Option<&Texture>,
 ) -> wgpu::PipelineLayout {
     device.create_pipeline_layout(&PipelineLayoutDescriptor {
         label: None,
-        bind_group_layouts: &[&camera.layout],
+        bind_group_layouts: &[
+            &texture.unwrap().get_bind_group_layout(&device),
+            &camera.layout,
+        ],
         push_constant_ranges: &[],
     })
 }

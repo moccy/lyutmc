@@ -28,52 +28,58 @@ impl Cube {
         }
     }
 
+    // 0,0______1,0
+    //  |        |
+    //  |        |
+    //  |        |
+    //  |________|
+    // 0,1      1,1
+
     pub fn get_vertices() -> [Vertex; 8] {
         [
             Vertex {
                 position: uv::Vec3::new(-1.0, -1.0, 1.0), // Front Bottom Left
-                color: uv::Vec3::new(1.0, 0.0, 0.0),      // Red
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, -1.0, 1.0), // Front Bottom Right
-                color: uv::Vec3::new(0.0, 1.0, 0.0),     // Green
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, 1.0, 1.0), // Front Top Right
-                color: uv::Vec3::new(1.0, 0.0, 1.0),    // Magenta
+                tex_coords: uv::Vec2::new(0.0, 1.0),
             },
             Vertex {
                 position: uv::Vec3::new(-1.0, 1.0, 1.0), // Front Top Left
-                color: uv::Vec3::new(1.0, 1.0, 0.0),     // Yellow
+                tex_coords: uv::Vec2::new(0.0, 0.0),
             },
             Vertex {
-                position: uv::Vec3::new(-1.0, -1.0, -1.0), // Back Bottom Right
-                color: uv::Vec3::new(0.0, 0.0, 1.0),       // Blue
+                position: uv::Vec3::new(1.0, 1.0, 1.0), // Front Top Right
+                tex_coords: uv::Vec2::new(1.0, 0.0),
             },
             Vertex {
-                position: uv::Vec3::new(1.0, -1.0, -1.0), // Back Bottom Left
-                color: uv::Vec3::new(0.0, 1.0, 1.0),      // Cyan
+                position: uv::Vec3::new(1.0, -1.0, 1.0), // Front Bottom Right
+                tex_coords: uv::Vec2::new(1.0, 1.0),
             },
             Vertex {
-                position: uv::Vec3::new(1.0, 1.0, -1.0), // Back Top Left
-                color: uv::Vec3::new(1.0, 1.0, 1.0),     // White
+                position: uv::Vec3::new(-1.0, -1.0, -1.0), // Back Bottom Left
+                tex_coords: uv::Vec2::new(1.0, 1.0),
             },
             Vertex {
-                position: uv::Vec3::new(-1.0, 1.0, -1.0), // Back Top Right
-                color: uv::Vec3::new(0.5, 0.5, 0.5),      // Grey
+                position: uv::Vec3::new(-1.0, 1.0, -1.0), // Back Top Left
+                tex_coords: uv::Vec2::new(1.0, 0.0),
+            },
+            Vertex {
+                position: uv::Vec3::new(1.0, 1.0, -1.0), // Back Top Right
+                tex_coords: uv::Vec2::new(0.0, 0.0),
+            },
+            Vertex {
+                position: uv::Vec3::new(1.0, -1.0, -1.0), // Back Bottom Right
+                tex_coords: uv::Vec2::new(0.0, 1.0),
             },
         ]
     }
 
     pub fn get_indices() -> [u16; 36] {
         [
-            // front face (Z-positive)
-            2, 1, 0, 0, 3, 2, // right face (X-positive)
-            6, 5, 1, 1, 2, 6, // back face (Z-negative)
-            7, 4, 5, 5, 6, 7, // left face (X-negative)
-            3, 0, 4, 4, 7, 3, // top face (Y-positive)
-            6, 2, 3, 3, 7, 6, // bottom face (Y-negative)
-            1, 5, 4, 4, 0, 1,
+            0, 1, 2, 0, 2, 3, // front face (Z-positive)
+            7, 6, 5, 7, 5, 4, // back face (Z-negative)
+            3, 2, 6, 3, 6, 7, // right face (X-positive)
+            4, 5, 1, 4, 1, 0, // left face (X-negative)
+            1, 5, 6, 1, 6, 2, // top face (Y-positive)
+            4, 0, 3, 4, 3, 7, // bottom face (Y-negative)
         ]
     }
 
