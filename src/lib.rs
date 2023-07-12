@@ -1,7 +1,9 @@
+use camera::{Camera, CameraUniform};
 use input::InputManager;
 use shapes::{cube::Cube, triangle::Triangle};
 use winit::{event::Event, event_loop::EventLoop, window::WindowBuilder};
 
+mod camera;
 mod device;
 mod event;
 mod input;
@@ -34,9 +36,16 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
     // and a queue.
     let (device, queue) = device::create_device_and_queue(&adapter).await;
 
+    let camera = Camera::new(
+        (0.0, 1.0, 2.0).into(),
+        (0.0, 0.0, 0.0).into(),
+        logical_window_size.width as f32 / logical_window_size.height as f32,
+    );
+    let camera_uniform = CameraUniform::new(&camera, &device);
+
     // A handle to a compiled shader module.
     let shader = shader::create_shader("src/shaders/shader.wgsl", &device);
-    let pipeline_layout = pipeline::create_pipeline_layout(&device);
+    let pipeline_layout = pipeline::create_pipeline_layout(&device, &camera_uniform);
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
     let swapchain_format = swapchain_capabilities.formats[0];
@@ -103,6 +112,7 @@ pub async fn run(window_title: &str, window_size: [u32; 2]) {
                 });
                 render_pass.set_pipeline(&active_render_pipeline);
 
+                render_pass.set_bind_group(0, &camera_uniform.bind_group, &[]);
                 render_pass.set_vertex_buffer(0, cube.vertex_buffer.slice(..));
                 render_pass
                     .set_index_buffer(cube.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
