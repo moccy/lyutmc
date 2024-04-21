@@ -10,6 +10,13 @@ pub struct Vertex {
 }
 
 impl Vertex {
+    pub fn new(pos: (f32, f32, f32), tex: (f32, f32)) -> Self {
+        Self {
+            position: uv::Vec3::new(pos.0, pos.1, pos.2),
+            tex_coords: uv::Vec2::new(tex.0, tex.1)
+        }
+    }
+
     pub fn get_buffer_layout() -> VertexBufferLayout<'static> {
         VertexBufferLayout {
             array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress, // How big is a vertex?

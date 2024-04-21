@@ -1,4 +1,3 @@
-use ultraviolet as uv;
 use wgpu::{util::DeviceExt, Buffer, Device};
 
 use crate::primitives::vertex::Vertex;
@@ -34,41 +33,27 @@ impl Cube {
     //  |        |
     //  |________|
     // 0,1      1,1
-
-    pub fn get_vertices() -> [Vertex; 8] {
+    pub fn get_vertices() -> [Vertex; 16] {
         [
-            Vertex {
-                position: uv::Vec3::new(-1.0, -1.0, 1.0), // Front Bottom Left
-                tex_coords: uv::Vec2::new(0.0, 1.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(-1.0, 1.0, 1.0), // Front Top Left
-                tex_coords: uv::Vec2::new(0.0, 0.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, 1.0, 1.0), // Front Top Right
-                tex_coords: uv::Vec2::new(1.0, 0.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, -1.0, 1.0), // Front Bottom Right
-                tex_coords: uv::Vec2::new(1.0, 1.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(-1.0, -1.0, -1.0), // Back Bottom Left
-                tex_coords: uv::Vec2::new(1.0, 1.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(-1.0, 1.0, -1.0), // Back Top Left
-                tex_coords: uv::Vec2::new(1.0, 0.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, 1.0, -1.0), // Back Top Right
-                tex_coords: uv::Vec2::new(0.0, 0.0),
-            },
-            Vertex {
-                position: uv::Vec3::new(1.0, -1.0, -1.0), // Back Bottom Right
-                tex_coords: uv::Vec2::new(0.0, 1.0),
-            },
+            Vertex::new((-1.0, -1.0, 1.0), (0.0, 1.0)), // 0 - Front Bottom Left
+            Vertex::new((-1.0, 1.0, 1.0), (0.0, 0.0)), // 1 - Front Top Left
+            Vertex::new((1.0, 1.0, 1.0), (1.0, 0.0)), // 2 - Front Top Right
+            Vertex::new((1.0, -1.0, 1.0), (1.0, 1.0)), // 3 - Front Bottom Right
+
+            Vertex::new((-1.0, -1.0, -1.0), (1.0, 1.0)), // 4 - Back Bottom Left
+            Vertex::new((-1.0, 1.0, -1.0), (1.0, 0.0)), // 5 - Back Top Left
+            Vertex::new((1.0, 1.0, -1.0), (0.0, 0.0)), // 6 - Back Top Right
+            Vertex::new((1.0, -1.0, -1.0), (0.0, 1.0)), // 7 - Back Bottom Right
+
+            Vertex::new((-1.0, 1.0, 1.0), (0.0, 0.0)),   // 8 - Top Front Left (new)
+            Vertex::new((1.0, 1.0, 1.0), (1.0, 0.0)),     // 9 - Top Front Right (new)
+            Vertex::new((-1.0, 1.0, -1.0), (0.0, 1.0)),  // 10 - Top Back Left (new)
+            Vertex::new((1.0, 1.0, -1.0), (1.0, 1.0)),   // 11 - Top Back Right (new)
+
+            Vertex::new((-1.0, -1.0, 1.0), (0.0, 0.0)),   // 12 - Bottom Front Left (new)
+            Vertex::new((1.0, -1.0, 1.0), (1.0, 0.0)),     // 13 - Bottom Front Right (new)
+            Vertex::new((-1.0, -1.0, -1.0), (0.0, 1.0)),  // 14 - Bottom Back Left (new)
+            Vertex::new((1.0, -1.0, -1.0), (1.0, 1.0)),   // 15 - Bottom Back Right (new)
         ]
     }
 
@@ -78,13 +63,13 @@ impl Cube {
             7, 6, 5, 7, 5, 4, // back face (Z-negative)
             3, 2, 6, 3, 6, 7, // right face (X-positive)
             4, 5, 1, 4, 1, 0, // left face (X-negative)
-            1, 5, 6, 1, 6, 2, // top face (Y-positive)
-            4, 0, 3, 4, 3, 7, // bottom face (Y-negative)
+            8, 10, 11, 8, 11, 9, // top face (Y-positive)
+            15, 14, 12, 13, 15, 12, // bottom face (Y-negative)
         ]
     }
 
     pub fn get_vertices_len() -> u32 {
-        8
+        16
     }
 
     pub fn get_indices_len() -> u32 {
